@@ -85,3 +85,4 @@ Editor/
 Resources/
 ThirdParty/
 ```
+For more details about the project, see the main [README.md](../README.md).
