@@ -2,7 +2,7 @@
 
 # Unity Folder Structure Generator
 
-A Unity Editor tool that automatically creates organized folder structures for your Unity projects using configurable templates.
+A Unity Editor tool that automatically creates organized folder structures for Unity projects using configurable templates.
 
 ![Last Commit](https://img.shields.io/github/last-commit/emirbesir/unity-folder-generator?style=flat&logo=git&logoColor=white&color=0080ff)
 ![Top Language](https://img.shields.io/github/languages/top/emirbesir/unity-folder-generator?style=flat&color=0080ff)
