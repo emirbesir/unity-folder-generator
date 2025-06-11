@@ -1,155 +1,157 @@
-// FolderStructureConfig.cs
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "FolderStructureConfig", menuName = "Unity Tools/Folder Structure Config")]
-public class FolderStructureConfig : ScriptableObject
+namespace Editor
 {
-    [Header("Project Settings")]
-    [Tooltip("Default project name that will appear in the folder creation window")]
-    public string defaultProjectName = "_PROJECT_NAME";
-    [Tooltip("Define the main folders and their subfolders")]
-    public List<FolderGroup> folderGroups = new List<FolderGroup>();
-    [Tooltip("Additional standalone folders to create")]
-    public List<string> standaloneFolders = new List<string>();
-    
-    [Header("Additional Options")]
-    [Tooltip("Create .gitkeep files in empty folders for version control")]
-    public bool createGitKeepFiles = true;
-    
-    [System.Serializable]
-    public class FolderGroup
+    [CreateAssetMenu(fileName = "FolderStructureConfig", menuName = "Unity Tools/Folder Structure Config")]
+    public class FolderStructureConfig : ScriptableObject
     {
-        [Tooltip("Name of the main folder")]
-        public string mainFolder;
-        
-        [Tooltip("Subfolders to create inside the main folder")]
-        public List<string> subfolders = new List<string>();
-        
-        [Tooltip("Enable/disable this folder group")]
-        public bool enabled = true;
-    }
+        [Header("Project Settings")]
+        [Tooltip("Default project name that will appear in the folder creation window")]
+        public string defaultProjectName = "_PROJECT_NAME";
+        [Tooltip("Define the main folders and their subfolders")]
+        public List<FolderGroup> folderGroups = new List<FolderGroup>();
+        [Tooltip("Additional standalone folders to create")]
+        public List<string> standaloneFolders = new List<string>();
     
-    // Method to get the folder structure as a dictionary (for compatibility)
-    public Dictionary<string, List<string>> GetFolderStructure()
-    {
-        Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
-        
-        // Add main folders and their subfolders (filter out empty ones)
-        foreach (var group in folderGroups)
+        [Header("Additional Options")]
+        [Tooltip("Create .gitkeep files in empty folders for version control")]
+        public bool createGitKeepFiles = true;
+    
+        [System.Serializable]
+        public class FolderGroup
         {
-            if (group.enabled && !string.IsNullOrWhiteSpace(group.mainFolder))
-            {
-                List<string> validSubfolders = new List<string>();
-                foreach (string subfolder in group.subfolders)
-                {
-                    if (!string.IsNullOrWhiteSpace(subfolder))
-                    {
-                        validSubfolders.Add(subfolder);
-                    }
-                }
-                structure[group.mainFolder] = validSubfolders;
-            }
+            [Tooltip("Name of the main folder")]
+            public string mainFolder;
+        
+            [Tooltip("Subfolders to create inside the main folder")]
+            public List<string> subfolders = new List<string>();
+        
+            [Tooltip("Enable/disable this folder group")]
+            public bool enabled = true;
         }
-        
-        // Add standalone folders (filter out empty ones)
-        foreach (var folder in standaloneFolders)
-        {
-            if (!string.IsNullOrWhiteSpace(folder))
-            {
-                structure[folder] = new List<string>();
-            }
-        }
-        
-        return structure;
-    }
     
-    // Create a default configuration
-    public void SetDefaultStructure()
-    {
-        folderGroups.Clear();
-        
-        folderGroups.Add(new FolderGroup
+        // Method to get the folder structure as a dictionary (for compatibility)
+        public Dictionary<string, List<string>> GetFolderStructure()
         {
-            mainFolder = "Art",
-            subfolders = new List<string> { "Sprites", "Animations", "Tilemaps", "Shaders", "Materials", "Models", "Textures", "Fonts" },
-            enabled = true
-        });
+            Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
         
-        folderGroups.Add(new FolderGroup
-        {
-            mainFolder = "Audio",
-            subfolders = new List<string> { "Music", "SFX", "Voice" },
-            enabled = true
-        });
-        
-        folderGroups.Add(new FolderGroup
-        {
-            mainFolder = "Prefabs",
-            subfolders = new List<string> { "Characters", "Environment", "UI", "Gameplay", "Effects" },
-            enabled = true
-        });
-        
-        folderGroups.Add(new FolderGroup
-        {
-            mainFolder = "Scenes",
-            subfolders = new List<string> { "Gameplay", "Menus", "Test", "Levels" },
-            enabled = true
-        });
-        
-        folderGroups.Add(new FolderGroup
-        {
-            mainFolder = "Scripts",
-            subfolders = new List<string> { "Core", "Gameplay", "UI", "Data", "Editor", "Tests", "Utilities" },
-            enabled = true
-        });
-        
-        folderGroups.Add(new FolderGroup
-        {
-            mainFolder = "Data",
-            subfolders = new List<string> { "ScriptableObjects", "JSON", "Localization", "Configs" },
-            enabled = true
-        });
-        
-        standaloneFolders.AddRange(new[] { "Settings", "Resources", "StreamingAssets", "Plugins", "Documentation", "ThirdParty" });
-    }
-    
-    private void OnValidate()
-    {
-        // Only clean up empty entries if we have more than one empty entry
-        // This allows users to add new items through the Inspector
-        
-        // Clean standalone folders - keep at least one empty entry for adding new items
-        if (standaloneFolders.Count > 1)
-        {
-            int emptyCount = 0;
-            for (int i = standaloneFolders.Count - 1; i >= 0; i--)
+            // Add main folders and their subfolders (filter out empty ones)
+            foreach (var group in folderGroups)
             {
-                if (string.IsNullOrWhiteSpace(standaloneFolders[i]))
+                if (group.enabled && !string.IsNullOrWhiteSpace(group.mainFolder))
                 {
-                    emptyCount++;
-                    if (emptyCount > 1)
+                    List<string> validSubfolders = new List<string>();
+                    foreach (string subfolder in group.subfolders)
                     {
-                        standaloneFolders.RemoveAt(i);
+                        if (!string.IsNullOrWhiteSpace(subfolder))
+                        {
+                            validSubfolders.Add(subfolder);
+                        }
                     }
+                    structure[group.mainFolder] = validSubfolders;
                 }
             }
-        }
         
-        // Clean subfolders - keep at least one empty entry for adding new items
-        foreach (var group in folderGroups)
+            // Add standalone folders (filter out empty ones)
+            foreach (var folder in standaloneFolders)
+            {
+                if (!string.IsNullOrWhiteSpace(folder))
+                {
+                    structure[folder] = new List<string>();
+                }
+            }
+        
+            return structure;
+        }
+    
+        // Create a default configuration
+        public void SetDefaultStructure()
         {
-            if (group.subfolders != null && group.subfolders.Count > 1)
+            folderGroups.Clear();
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Art",
+                subfolders = new List<string> { "Sprites", "Animations", "Tilemaps", "Shaders", "Materials", "Models", "Textures", "Fonts" },
+                enabled = true
+            });
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Audio",
+                subfolders = new List<string> { "Music", "SFX", "Voice" },
+                enabled = true
+            });
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Prefabs",
+                subfolders = new List<string> { "Characters", "Environment", "UI", "Gameplay", "Effects" },
+                enabled = true
+            });
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Scenes",
+                subfolders = new List<string> { "Gameplay", "Menus", "Test", "Levels" },
+                enabled = true
+            });
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Scripts",
+                subfolders = new List<string> { "Core", "Gameplay", "UI", "Data", "Editor", "Tests", "Utilities" },
+                enabled = true
+            });
+        
+            folderGroups.Add(new FolderGroup
+            {
+                mainFolder = "Data",
+                subfolders = new List<string> { "ScriptableObjects", "JSON", "Localization", "Configs" },
+                enabled = true
+            });
+        
+            standaloneFolders.AddRange(new[] { "Settings", "Resources", "StreamingAssets", "Plugins", "Documentation", "ThirdParty" });
+        }
+    
+        private void OnValidate()
+        {
+            // Only clean up empty entries if we have more than one empty entry
+            // This allows users to add new items through the Inspector
+        
+            // Clean standalone folders - keep at least one empty entry for adding new items
+            if (standaloneFolders.Count > 1)
             {
                 int emptyCount = 0;
-                for (int i = group.subfolders.Count - 1; i >= 0; i--)
+                for (int i = standaloneFolders.Count - 1; i >= 0; i--)
                 {
-                    if (string.IsNullOrWhiteSpace(group.subfolders[i]))
+                    if (string.IsNullOrWhiteSpace(standaloneFolders[i]))
                     {
                         emptyCount++;
                         if (emptyCount > 1)
                         {
-                            group.subfolders.RemoveAt(i);
+                            standaloneFolders.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+        
+            // Clean subfolders - keep at least one empty entry for adding new items
+            foreach (var group in folderGroups)
+            {
+                if (group.subfolders != null && group.subfolders.Count > 1)
+                {
+                    int emptyCount = 0;
+                    for (int i = group.subfolders.Count - 1; i >= 0; i--)
+                    {
+                        if (string.IsNullOrWhiteSpace(group.subfolders[i]))
+                        {
+                            emptyCount++;
+                            if (emptyCount > 1)
+                            {
+                                group.subfolders.RemoveAt(i);
+                            }
                         }
                     }
                 }
