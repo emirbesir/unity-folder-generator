@@ -31,8 +31,8 @@ namespace Editor
             public bool enabled = true;
         }
     
-        // Method to get the folder structure as a dictionary (for compatibility)
-        public Dictionary<string, List<string>> GetFolderStructure()
+        // Method to get the main folder structure as a dictionary
+        public Dictionary<string, List<string>> GetMainFolderStructure()
         {
             Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
         
@@ -52,6 +52,13 @@ namespace Editor
                     structure[group.mainFolder] = validSubfolders;
                 }
             }
+            return structure;
+        }
+        
+        // Method to get the standalone folder structure as a dictionary
+        public Dictionary<string, List<string>> GetStandaloneFolderStructure()
+        {
+            Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
         
             // Add standalone folders (filter out empty ones)
             foreach (var folder in standaloneFolders)
@@ -63,56 +70,6 @@ namespace Editor
             }
         
             return structure;
-        }
-    
-        // Create a default configuration
-        public void SetDefaultStructure()
-        {
-            folderGroups.Clear();
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Art",
-                subfolders = new List<string> { "Sprites", "Animations", "Tilemaps", "Shaders", "Materials", "Models", "Textures", "Fonts" },
-                enabled = true
-            });
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Audio",
-                subfolders = new List<string> { "Music", "SFX", "Voice" },
-                enabled = true
-            });
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Prefabs",
-                subfolders = new List<string> { "Characters", "Environment", "UI", "Gameplay", "Effects" },
-                enabled = true
-            });
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Scenes",
-                subfolders = new List<string> { "Gameplay", "Menus", "Test", "Levels" },
-                enabled = true
-            });
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Scripts",
-                subfolders = new List<string> { "Core", "Gameplay", "UI", "Data", "Editor", "Tests", "Utilities" },
-                enabled = true
-            });
-        
-            folderGroups.Add(new FolderGroup
-            {
-                mainFolder = "Data",
-                subfolders = new List<string> { "ScriptableObjects", "JSON", "Localization", "Configs" },
-                enabled = true
-            });
-        
-            standaloneFolders.AddRange(new[] { "Settings", "Resources", "StreamingAssets", "Plugins", "Documentation", "ThirdParty" });
         }
     
         private void OnValidate()
