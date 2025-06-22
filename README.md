@@ -10,7 +10,12 @@ A Unity Editor tool that automatically creates organized folder structures for U
 
 _Tested with **Unity 6000.1.3f1**_
 
+---
+
+![Usage](docs/usage.gif)
+
 </div>
+
 
 ## Features
 
