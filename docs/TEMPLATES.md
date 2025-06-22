@@ -2,13 +2,15 @@
 
 # Templates
 
-This document outlines the base folder structure templates for 2D/3D Unity projects.
+This document outlines the base folder structure templates for 2D/3D Unity projects with one simple and one comprehensive configs for each.
 
 </div>
 
-## 2D Project Structure
+## 2D Project Structures
 
-```
+### 2D Folder Config
+
+```text
 _Project/
 ├── Art/
 │   ├── Animations/
@@ -45,7 +47,26 @@ Resources/
 ThirdParty/
 ```
 
-## 3D Project Structure
+### Simple 2D Folder Config
+
+```text
+_Project/
+├── Art/
+│   ├── Animations/
+│   ├── Sprites/
+├── Audio/
+│   ├── Music/
+│   └── SFX/
+├── Prefabs/
+├── Scenes/
+├── Scripts/
+└── Settings/
+ThirdParty/
+```
+
+## 3D Project Structures
+
+### 3D Folder Config
 
 ```text
 _Project/
@@ -85,4 +106,24 @@ Editor/
 Resources/
 ThirdParty/
 ```
+
+### Simple 3D Folder Config
+
+```text
+_Project/
+├── Art/
+│   ├── Animations/
+│   ├── Models/
+│   ├── Materials/
+│   ├── Textures/
+├── Audio/
+│   ├── Music/
+│   └── SFX/
+├── Prefabs/
+├── Scenes/
+├── Scripts/
+└── Settings/
+ThirdParty/
+```
+
 For more details about the project, see the main [README.md](../README.md).
