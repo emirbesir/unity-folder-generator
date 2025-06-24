@@ -31,17 +31,14 @@ namespace Editor
             public bool enabled = true;
         }
     
-        // Method to get the main folder structure as a dictionary
         public Dictionary<string, List<string>> GetMainFolderStructure()
         {
-            Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
-        
-            // Add main folders and their subfolders (filter out empty ones)
+            var structure = new Dictionary<string, List<string>>();
             foreach (var group in folderGroups)
             {
                 if (group.enabled && !string.IsNullOrWhiteSpace(group.mainFolder))
                 {
-                    List<string> validSubfolders = new List<string>();
+                    var validSubfolders = new List<string>();
                     foreach (string subfolder in group.subfolders)
                     {
                         if (!string.IsNullOrWhiteSpace(subfolder))
@@ -55,12 +52,9 @@ namespace Editor
             return structure;
         }
         
-        // Method to get the standalone folder structure as a dictionary
         public Dictionary<string, List<string>> GetStandaloneFolderStructure()
         {
-            Dictionary<string, List<string>> structure = new Dictionary<string, List<string>>();
-        
-            // Add standalone folders (filter out empty ones)
+            var structure = new Dictionary<string, List<string>>();
             foreach (var folder in standaloneFolders)
             {
                 if (!string.IsNullOrWhiteSpace(folder))
@@ -68,16 +62,15 @@ namespace Editor
                     structure[folder] = new List<string>();
                 }
             }
-        
             return structure;
         }
     
         private void OnValidate()
         {
-            // Only clean up empty entries if we have more than one empty entry
-            // This allows users to add new items through the Inspector
+            // The following logic cleans up empty list entries to prevent clutter.
+            // It intentionally leaves one empty slot available in the Inspector,
+            // allowing the user to easily add a new item without extra clicks.
         
-            // Clean standalone folders - keep at least one empty entry for adding new items
             if (standaloneFolders.Count > 1)
             {
                 int emptyCount = 0;
@@ -94,7 +87,6 @@ namespace Editor
                 }
             }
         
-            // Clean subfolders - keep at least one empty entry for adding new items
             foreach (var group in folderGroups)
             {
                 if (group.subfolders != null && group.subfolders.Count > 1)
