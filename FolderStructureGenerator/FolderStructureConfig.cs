@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Editor
@@ -31,6 +32,9 @@ namespace Editor
             public bool enabled = true;
         }
     
+        /// <summary>
+        /// Returns a dictionary of main folders and their subfolders, filtering out disabled or empty entries.
+        /// </summary>
         public Dictionary<string, List<string>> GetMainFolderStructure()
         {
             var structure = new Dictionary<string, List<string>>();
@@ -38,38 +42,28 @@ namespace Editor
             {
                 if (group.enabled && !string.IsNullOrWhiteSpace(group.mainFolder))
                 {
-                    var validSubfolders = new List<string>();
-                    foreach (string subfolder in group.subfolders)
-                    {
-                        if (!string.IsNullOrWhiteSpace(subfolder))
-                        {
-                            validSubfolders.Add(subfolder);
-                        }
-                    }
+                    var validSubfolders = group.subfolders.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
                     structure[group.mainFolder] = validSubfolders;
                 }
             }
             return structure;
         }
         
-        public Dictionary<string, List<string>> GetStandaloneFolderStructure()
+        /// <summary>
+        /// Returns a clean list of standalone folders, filtering out any empty or whitespace entries.
+        /// </summary>
+        public List<string> GetStandaloneFolders()
         {
-            var structure = new Dictionary<string, List<string>>();
-            foreach (var folder in standaloneFolders)
-            {
-                if (!string.IsNullOrWhiteSpace(folder))
-                {
-                    structure[folder] = new List<string>();
-                }
-            }
-            return structure;
+            return standaloneFolders.Where(folder => !string.IsNullOrWhiteSpace(folder)).ToList();
         }
     
+        /// <summary>
+        /// This method is called in the Editor whenever the script is loaded or a value is changed in the Inspector.
+        /// </summary>
         private void OnValidate()
         {
-            // The following logic cleans up empty list entries to prevent clutter.
-            // It intentionally leaves one empty slot available in the Inspector,
-            // allowing the user to easily add a new item without extra clicks.
+            // The following logic cleans up empty list entries to prevent clutter in the Inspector.
+            // It intentionally leaves one empty slot available, allowing the user to easily add a new item.
         
             if (standaloneFolders.Count > 1)
             {

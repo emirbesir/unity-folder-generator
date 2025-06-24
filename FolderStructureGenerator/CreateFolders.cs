@@ -1,12 +1,15 @@
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor
 {
+    /// <summary>
+    /// The Editor Window for the Folder Structure Generator.
+    /// This class is responsible for drawing the UI and capturing user input.
+    /// It calls the FolderGenerator class to perform the actual folder creation logic.
+    /// </summary>
     public class CreateFolders : EditorWindow 
     {
-        private const string AssetsPath = "Assets";
         private const int WindowWidth = 500;
         private const int WindowHeight = 400;
         
@@ -15,133 +18,72 @@ namespace Editor
         private Vector2 scrollPosition;
         private bool showAdvancedOptions;
     
-        // Menu item to open the folder creation window
-        [MenuItem("Assets/Create Folders")]
+        /// <summary>
+        /// Creates the menu item in the Unity Editor to open this window.
+        /// </summary>
+        [MenuItem("Assets/Create Project Folders")]
         private static void ShowFolderCreationWindow()
         {
-            CreateFolders window = GetWindow<CreateFolders>();
-            window.titleContent = new GUIContent("Folder Structure Generator");
+            CreateFolders window = GetWindow<CreateFolders>("Folder Generator");
             window.minSize = new Vector2(WindowWidth, WindowHeight);
             window.Show();
         }
     
-        // Method to create all folders based on the selected configuration
-        private void CreateAllFolders()
-        {
-            if (!IsValidProjectName(projectName))
-            {
-                EditorUtility.DisplayDialog("Invalid Project Name", "Please enter a valid project name without special characters.", "OK");
-                return;
-            }
-        
-            var mainFolderStructure = config.GetMainFolderStructure();
-            var standaloneFolderStructure = config.GetStandaloneFolderStructure();
-            int totalFoldersCreated = 0;
-            
-            try
-            {
-                // Create main project folder structure
-                string projectRootPath = Path.Combine(AssetsPath, projectName);
-                foreach (var folder in mainFolderStructure)
-                {
-                    string mainFolderPath = Path.Combine(projectRootPath, folder.Key);
-                    if (CreateDirectoryAndKeep(mainFolderPath, config.createGitKeepFiles && folder.Value.Count == 0))
-                    {
-                        totalFoldersCreated++;
-                    }
-                
-                    // Create subfolders
-                    foreach (string subfolder in folder.Value)
-                    {
-                        string subFolderPath = Path.Combine(mainFolderPath, subfolder);
-                        if (CreateDirectoryAndKeep(subFolderPath, config.createGitKeepFiles))
-                            {
-                            totalFoldersCreated++;
-                        }
-                    }
-                }
-
-                // Create standalone folders
-                foreach (var folder in standaloneFolderStructure)
-                {
-                    string standaloneFolderPath = Path.Combine(AssetsPath, folder.Key);
-                    if (CreateDirectoryAndKeep(standaloneFolderPath, config.createGitKeepFiles))
-                    {
-                        totalFoldersCreated++;
-                    }
-                }
-            
-                AssetDatabase.Refresh();
-                EditorUtility.DisplayDialog("Success", $"Successfully created {totalFoldersCreated} folders for '{projectName}'!", "OK");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Failed to create folder structure: {e.Message}");
-                EditorUtility.DisplayDialog("Error", $"Failed to create folders: {e.Message}", "OK");
-            }
-        }
-    
-        // Refactored Helper Method for creating directories
-        private bool CreateDirectoryAndKeep(string path, bool createGitKeep)
-        {
-            if (Directory.Exists(path))
-            {
-                return false;
-            }
-            
-            Directory.CreateDirectory(path);
-            Debug.Log($"Created folder: {path}");
-
-            if (createGitKeep)
-        {
-                string gitKeepPath = Path.Combine(path, ".gitkeep");
-            if (!File.Exists(gitKeepPath))
-            {
-                File.WriteAllText(gitKeepPath, "# This file ensures the folder is tracked by Git\n");
-            }
-        }
-            return true;
-        }
-    
-        private bool IsValidProjectName(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return false;
-            
-            char[] invalidChars = Path.GetInvalidFileNameChars();
-            return name.IndexOfAny(invalidChars) < 0;
-        }
-    
-        void OnGUI()
+        /// <summary>
+        /// This method is called by Unity to draw the editor window GUI.
+        /// </summary>
+        private void OnGUI()
         {
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+            
+            DrawHeader();
+            DrawConfigurationSelector();
+
+            // If no config is selected, stop drawing the rest of the UI
+            if (config == null)
+            {
+                EditorGUILayout.HelpBox("Please select a FolderStructureConfig asset to begin.", MessageType.Warning);
+                EditorGUILayout.EndScrollView();
+                return;
+            }
+
+            DrawAdvancedOptions();
+            DrawInfoBox();
+            DrawActionButtons();
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawHeader()
+        {
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Unity Folder Generator", EditorStyles.boldLabel);
             GUILayout.Space(10);
         
-            EditorGUILayout.LabelField("Project Name:");
+            EditorGUILayout.LabelField("Project Name:", EditorStyles.label);
             projectName = EditorGUILayout.TextField(projectName);
             GUILayout.Space(10);
-        
+        }
+
+        private void DrawConfigurationSelector()
+        {
             EditorGUILayout.LabelField("Configuration File:", EditorStyles.boldLabel);
             FolderStructureConfig newConfig = (FolderStructureConfig)EditorGUILayout.ObjectField("Folder Config", config, typeof(FolderStructureConfig), false);
         
+            // When the user assigns a new config file
             if (newConfig != config)
             {
                 config = newConfig;
+                // If the project name field is empty, populate it with the default from the config
                 if (config != null && string.IsNullOrEmpty(projectName))
                 {
                     projectName = config.defaultProjectName;
                 }
             }
-        
-            if (config == null)
-            {
-                EditorGUILayout.HelpBox("No configuration file selected. Please select a FolderStructureConfig asset.", MessageType.Warning);
-                EditorGUILayout.EndScrollView();
-                return;
-            }
-        
+        }
+
+        private void DrawAdvancedOptions()
+        {
             GUILayout.Space(10);
             showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "Advanced Options");
 
@@ -151,20 +93,23 @@ namespace Editor
                 EditorGUILayout.LabelField("Configuration Preview:", EditorStyles.boldLabel);
             
                 var mainFolderStructure = config.GetMainFolderStructure();
-                var standaloneFolderStructure = config.GetStandaloneFolderStructure();
+                var standaloneFolders = config.GetStandaloneFolders();
                 
-                EditorGUILayout.LabelField($"📁 {projectName}");
+                GUIContent folderIcon = EditorGUIUtility.IconContent("Folder Icon");
+                GUIContent subfolderIcon = EditorGUIUtility.IconContent("FolderEmpty Icon");
+
+                EditorGUILayout.LabelField(new GUIContent($" {projectName}", folderIcon.image));
                 EditorGUI.indentLevel++;
                 
                 foreach (var folder in mainFolderStructure)
                 {
-                    EditorGUILayout.LabelField($"📁 {folder.Key}");
+                    EditorGUILayout.LabelField(new GUIContent($" {folder.Key}", folderIcon.image));
                     if (folder.Value.Count > 0)
                     {
                         EditorGUI.indentLevel++;
                         foreach (var subfolder in folder.Value)
                         {
-                            EditorGUILayout.LabelField($"📂 {subfolder}");
+                            EditorGUILayout.LabelField(new GUIContent($" {subfolder}", subfolderIcon.image));
                         }
                         EditorGUI.indentLevel--;
                     }
@@ -172,21 +117,27 @@ namespace Editor
                 
                 EditorGUI.indentLevel--;
                 
-                foreach (var folder in standaloneFolderStructure)
+                foreach (var folder in standaloneFolders)
                 {
-                    EditorGUILayout.LabelField($"📁 {folder.Key}");
+                     if (string.IsNullOrWhiteSpace(folder)) continue;
+                    EditorGUILayout.LabelField(new GUIContent($" {folder}", folderIcon.image));
                 }
             
-                EditorGUI.indentLevel--;
+                EditorGUI.indentLevel = 0; // Reset indent level to be safe
             }
-        
+        }
+
+        private void DrawInfoBox()
+        {
             GUILayout.Space(10);
-        
             string infoText = $"This will create folders based on the selected configuration.\n";
             infoText += $"Git keep files: {(config.createGitKeepFiles ? "Enabled" : "Disabled")}\n";
             infoText += $"Total folder groups: {config.folderGroups.FindAll(g => g.enabled).Count}";
             EditorGUILayout.HelpBox(infoText, MessageType.Info);
-        
+        }
+
+        private void DrawActionButtons()
+        {
             GUILayout.Space(15);
             EditorGUILayout.BeginHorizontal();
         
@@ -196,15 +147,14 @@ namespace Editor
                 EditorGUIUtility.PingObject(config);
             }
         
-            GUI.enabled = IsValidProjectName(projectName) && config != null;
+            GUI.enabled = FolderGenerator.IsValidFolderName(projectName) && config != null;
             if (GUILayout.Button("Generate Folders!", GUILayout.Height(30)))
             {
-                CreateAllFolders();
+                FolderGenerator.CreateAllFolders(config, projectName);
             }
             GUI.enabled = true;
         
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndScrollView();
         }
     }
 }
