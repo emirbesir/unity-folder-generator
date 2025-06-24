@@ -6,10 +6,7 @@ namespace Editor
 {
     public class CreateFolders : EditorWindow 
     {
-        // Constant for folder path
-        private const string AssetsPath = "Assets/";
-        
-        // Window dimensions
+        private const string AssetsPath = "Assets";
         private const int WindowWidth = 500;
         private const int WindowHeight = 400;
         
@@ -33,94 +30,77 @@ namespace Editor
         {
             if (!IsValidProjectName(projectName))
             {
-                EditorUtility.DisplayDialog("Invalid Project Name", 
-                    "Please enter a valid project name without special characters.", "OK");
+                EditorUtility.DisplayDialog("Invalid Project Name", "Please enter a valid project name without special characters.", "OK");
                 return;
             }
         
             var mainFolderStructure = config.GetMainFolderStructure();
             var standaloneFolderStructure = config.GetStandaloneFolderStructure();
+            int totalFoldersCreated = 0;
             
             try
             {
-                int totalFolders = 0;
-            
-                // Create main folders and their subfolders
+                // Create main project folder structure
+                string projectRootPath = Path.Combine(AssetsPath, projectName);
                 foreach (var folder in mainFolderStructure)
                 {
-                    string mainFolderPath = AssetsPath + projectName + "/" + folder.Key;
-                
-                    // Create main folder if it doesn't exist
-                    if (!Directory.Exists(mainFolderPath))
+                    string mainFolderPath = Path.Combine(projectRootPath, folder.Key);
+                    if (CreateDirectoryAndKeep(mainFolderPath, config.createGitKeepFiles && folder.Value.Count == 0))
                     {
-                        Directory.CreateDirectory(mainFolderPath);
-                        Debug.Log($"Created folder: {mainFolderPath}");
-                        totalFolders++;
-                    
-                        // Create .gitkeep if enabled and no subfolders
-                        if (config.createGitKeepFiles && folder.Value.Count == 0)
-                        {
-                            CreateGitKeepFile(mainFolderPath);
-                        }
+                        totalFoldersCreated++;
                     }
                 
                     // Create subfolders
                     foreach (string subfolder in folder.Value)
                     {
-                        string subFolderPath = mainFolderPath + "/" + subfolder;
-                        if (!Directory.Exists(subFolderPath))
-                        {
-                            Directory.CreateDirectory(subFolderPath);
-                            Debug.Log($"Created subfolder: {subFolderPath}");
-                            totalFolders++;
-                        
-                            // Create .gitkeep if enabled
-                            if (config.createGitKeepFiles)
+                        string subFolderPath = Path.Combine(mainFolderPath, subfolder);
+                        if (CreateDirectoryAndKeep(subFolderPath, config.createGitKeepFiles))
                             {
-                                CreateGitKeepFile(subFolderPath);
-                            }
+                            totalFoldersCreated++;
                         }
                     }
                 }
+
                 // Create standalone folders
                 foreach (var folder in standaloneFolderStructure)
                 {
-                    string standaloneFolderPath = AssetsPath + "/" + folder.Key;
-                
-                    if (!Directory.Exists(standaloneFolderPath))
+                    string standaloneFolderPath = Path.Combine(AssetsPath, folder.Key);
+                    if (CreateDirectoryAndKeep(standaloneFolderPath, config.createGitKeepFiles))
                     {
-                        Directory.CreateDirectory(standaloneFolderPath);
-                        Debug.Log($"Created standalone folder: {standaloneFolderPath}");
-                        totalFolders++;
-                    
-                        // Create .gitkeep if enabled
-                        if (config.createGitKeepFiles)
-                        {
-                            CreateGitKeepFile(standaloneFolderPath);
-                        }
+                        totalFoldersCreated++;
                     }
                 }
             
                 AssetDatabase.Refresh();
-            
-                EditorUtility.DisplayDialog("Success", 
-                    $"Successfully created {totalFolders} folders for '{projectName}'!", "OK");
+                EditorUtility.DisplayDialog("Success", $"Successfully created {totalFoldersCreated} folders for '{projectName}'!", "OK");
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"Failed to create folder structure: {e.Message}");
-                EditorUtility.DisplayDialog("Error", 
-                    $"Failed to create folders: {e.Message}", "OK");
+                EditorUtility.DisplayDialog("Error", $"Failed to create folders: {e.Message}", "OK");
             }
         }
     
-        private void CreateGitKeepFile(string folderPath)
+        // Refactored Helper Method for creating directories
+        private bool CreateDirectoryAndKeep(string path, bool createGitKeep)
         {
-            string gitKeepPath = Path.Combine(folderPath, ".gitkeep");
+            if (Directory.Exists(path))
+            {
+                return false;
+            }
+            
+            Directory.CreateDirectory(path);
+            Debug.Log($"Created folder: {path}");
+
+            if (createGitKeep)
+        {
+                string gitKeepPath = Path.Combine(path, ".gitkeep");
             if (!File.Exists(gitKeepPath))
             {
                 File.WriteAllText(gitKeepPath, "# This file ensures the folder is tracked by Git\n");
             }
+        }
+            return true;
         }
     
         private bool IsValidProjectName(string name)
@@ -135,23 +115,16 @@ namespace Editor
         void OnGUI()
         {
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-        
             GUILayout.Space(10);
-        
             EditorGUILayout.LabelField("Unity Folder Generator", EditorStyles.boldLabel);
-        
             GUILayout.Space(10);
         
-            // Project name input
             EditorGUILayout.LabelField("Project Name:");
             projectName = EditorGUILayout.TextField(projectName);
-        
             GUILayout.Space(10);
         
-            // Config file reference
             EditorGUILayout.LabelField("Configuration File:", EditorStyles.boldLabel);
-            FolderStructureConfig newConfig = (FolderStructureConfig)EditorGUILayout.ObjectField(
-                "Folder Config", config, typeof(FolderStructureConfig), false);
+            FolderStructureConfig newConfig = (FolderStructureConfig)EditorGUILayout.ObjectField("Folder Config", config, typeof(FolderStructureConfig), false);
         
             if (newConfig != config)
             {
@@ -170,13 +143,11 @@ namespace Editor
             }
         
             GUILayout.Space(10);
-        
-            // Advanced options toggle
             showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "Advanced Options");
+
             if (showAdvancedOptions)
             {
                 EditorGUI.indentLevel++;
-            
                 EditorGUILayout.LabelField("Configuration Preview:", EditorStyles.boldLabel);
             
                 var mainFolderStructure = config.GetMainFolderStructure();
@@ -211,16 +182,12 @@ namespace Editor
         
             GUILayout.Space(10);
         
-            // Info box
             string infoText = $"This will create folders based on the selected configuration.\n";
             infoText += $"Git keep files: {(config.createGitKeepFiles ? "Enabled" : "Disabled")}\n";
             infoText += $"Total folder groups: {config.folderGroups.FindAll(g => g.enabled).Count}";
-        
             EditorGUILayout.HelpBox(infoText, MessageType.Info);
         
             GUILayout.Space(15);
-        
-            // Buttons
             EditorGUILayout.BeginHorizontal();
         
             if (GUILayout.Button("Open Config", GUILayout.Height(30)))
@@ -237,7 +204,6 @@ namespace Editor
             GUI.enabled = true;
         
             EditorGUILayout.EndHorizontal();
-        
             EditorGUILayout.EndScrollView();
         }
     }
