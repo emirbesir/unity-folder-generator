@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 
-namespace Editor.Tests
+namespace UnityFolderGenerator.Editor.Tests
 {
     [TestFixture]
     public class FolderGeneratorTests
