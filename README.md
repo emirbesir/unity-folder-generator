@@ -2,38 +2,20 @@
 
 # Unity Folder Structure Generator
 
-A Unity Editor tool that automatically creates organized folder structures for Unity projects using configurable templates.
+This repository contains a Unity Editor tool that automatically creates organized folder structures for Unity projects using configurable templates.
 
 ![Last Commit](https://img.shields.io/github/last-commit/emirbesir/unity-folder-generator?style=flat&logo=git&logoColor=white&color=0080ff)
 ![Top Language](https://img.shields.io/github/languages/top/emirbesir/unity-folder-generator?style=flat&color=0080ff)
 ![Unity](https://img.shields.io/badge/Unity-FFFFFF.svg?style=flat&logo=Unity&logoColor=black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-
-_Tested with **Unity 6000.1.3f1**_
+_Made and Tested with **Unity 6000.1.3f1**_
 
 ---
 
-![Usage](docs/usage.gif)
+![Usage](docs/img/usage.gif)
 
 </div>
-
-## Table of Contents
-
-- [Features](#features)
-- [Installation & Usage](#installation--usage)
-  - [Quick Start](#quick-start)
-  - [Creating Custom Configurations](#creating-custom-configurations)
-  - [Templates](#built-in-templates-for-2d3d-games)
-- [API Reference](#api-reference)
-- [License](#license)
-- [Contributing](#contributing)
-
-## Features
-
-- **Configurable Templates**: Create custom folder structures using ScriptableObject configurations.
-- **Pre-built Configurations**: Includes 2D and 3D project templates out of the box.
-- **Git Integration**: Optional `.gitkeep` file generation for empty folders.
 
 ## Installation & Usage
 
@@ -59,19 +41,4 @@ _Tested with **Unity 6000.1.3f1**_
 
 ### [Built-in Templates for 2D/3D Games](docs/TEMPLATES.md)
 
-## API Reference
-
-### FolderStructureConfig
-The main configuration `ScriptableObject` with the following properties:
-- `defaultProjectName`: Default project name.
-- `folderGroups`: List of main folders and their subfolders.
-- `standaloneFolders`: Independent folders.
-- `createGitKeepFiles`: Enable/disable `.gitkeep` generation.
-
-### CreateFolders
-The editor window class that handles the folder creation process.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+---
