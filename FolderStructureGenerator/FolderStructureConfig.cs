@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Editor
+namespace UnityFolderGenerator.Editor
 {
     [CreateAssetMenu(fileName = "FolderStructureConfig", menuName = "Unity Tools/Folder Structure Config")]
     public class FolderStructureConfig : ScriptableObject
@@ -14,10 +14,15 @@ namespace Editor
         public List<FolderGroup> folderGroups = new List<FolderGroup>();
         [Tooltip("Additional standalone folders to create")]
         public List<string> standaloneFolders = new List<string>();
-    
+
         [Header("Additional Options")]
         [Tooltip("Create .gitkeep files in empty folders for version control")]
         public bool createGitKeepFiles = true;
+
+        [SerializeField, HideInInspector]
+        private int version;
+
+        public int Version => version;
     
         [System.Serializable]
         public class FolderGroup
@@ -64,7 +69,7 @@ namespace Editor
         {
             // The following logic cleans up empty list entries to prevent clutter in the Inspector.
             // It intentionally leaves one empty slot available, allowing the user to easily add a new item.
-        
+
             if (standaloneFolders.Count > 1)
             {
                 int emptyCount = 0;
@@ -98,6 +103,11 @@ namespace Editor
                         }
                     }
                 }
+            }
+
+            unchecked
+            {
+                version++;
             }
         }
     }
